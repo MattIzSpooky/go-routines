@@ -106,7 +106,7 @@ func (s Server) Listen() error {
 	return nil
 }
 
-func (s Server) GracefulShutdown() {
+func (s Server) GracefulShutdown() error {
 	s.logger.Println("Server is shutting down")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -116,8 +116,11 @@ func (s Server) GracefulShutdown() {
 
 	if err := s.Shutdown(ctx); err != nil {
 		s.logger.Fatalf("Could not gracefully shutdown the server: %v\n", err)
+		return err
 	}
 
 	close(s.messageChan)
 	s.logger.Println("Server has shutdown")
+
+	return nil
 }

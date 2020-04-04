@@ -40,12 +40,17 @@ func main() {
 			spam.Stop()
 		}
 
-		httpServer.GracefulShutdown()
+		if err := httpServer.GracefulShutdown(); err != nil {
+			panic(err)
+		}
+
 		os.Exit(0)
 	}()
 
 	for _, spam := range spammers {
-		spam.Start()
+		if err := spam.Start(); err != nil {
+			panic(err)
+		}
 	}
 
 	if err := httpServer.Listen(); err != nil {
