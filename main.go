@@ -1,14 +1,13 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"routine-server/server"
 	"routine-server/spammer"
 	"syscall"
 )
-
-const amountOfSpammers = 10
 
 func main() {
 	sigChan := make(chan os.Signal, 1)
@@ -21,12 +20,17 @@ func main() {
 		syscall.SIGHUP,
 	)
 
+	var amountOfSpammers int
+	flag.IntVar(&amountOfSpammers, "spammers", 10, "The amount of spammers")
+
+	flag.Parse()
+
 	httpServer := server.NewServer("localhost", "8080")
 
-	var spammers []*spammer.Spammer
+	spammers := make([]*spammer.Spammer, amountOfSpammers)
 
 	for i := 0; i < amountOfSpammers; i++ {
-		spammers = append(spammers, spammer.NewSpammer(httpServer.Addr))
+		spammers[i] = spammer.NewSpammer(httpServer.Addr)
 	}
 
 	go func() {

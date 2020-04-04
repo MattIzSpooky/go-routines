@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"routine-server/spammer"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -21,7 +22,14 @@ type Server struct {
 }
 
 func NewServer(address string, port string) *Server {
-	fullAddress := fmt.Sprintf("%s:%s", address, port)
+	var fullAddress string
+
+	if runtime.GOOS != "windows" && address == "localhost" {
+		fullAddress = fmt.Sprintf(":%s", port)
+	} else {
+		fullAddress = fmt.Sprintf("%s:%s", address, port)
+	}
+
 	server := &Server{
 		Server: http.Server{
 			Addr:         fullAddress,
