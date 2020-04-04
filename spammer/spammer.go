@@ -2,6 +2,7 @@ package spammer
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -39,7 +40,7 @@ func (s Spammer) Start() {
 }
 
 func (s Spammer) spam() {
-	name := strconv.FormatInt(int64(rand.Int()), 10)
+	name := base64.URLEncoding.EncodeToString([]byte(strconv.Itoa(rand.Int())))
 
 	requestBody, err := json.Marshal(Spam{
 		Name:  name,

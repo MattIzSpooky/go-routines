@@ -8,7 +8,7 @@ import (
 	"syscall"
 )
 
-const amountOfSpammers = 300
+const amountOfSpammers = 10
 
 func main() {
 	sigChan := make(chan os.Signal, 1)

@@ -8,26 +8,31 @@ import (
 	"net/http"
 	"os"
 	"routine-server/spammer"
+	"sync"
 	"time"
 )
 
 type Server struct {
 	http.Server
-	logger      *log.Logger
-	messageChan chan string
+	logger           *log.Logger
+	messageChan      chan string
+	mux              *sync.Mutex
+	requestsReceived int
 }
 
 func NewServer(address string, port string) *Server {
 	fullAddress := fmt.Sprintf("%s:%s", address, port)
 	server := &Server{
-		http.Server{
+		Server: http.Server{
 			Addr:         fullAddress,
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			IdleTimeout:  15 * time.Second,
 		},
-		log.New(os.Stdout, "Log: ", 0),
-		make(chan string),
+		logger:           log.New(os.Stdout, "Log: ", 0),
+		messageChan:      make(chan string),
+		mux:              &sync.Mutex{},
+		requestsReceived: 0,
 	}
 
 	server.addHandlers()
@@ -38,7 +43,7 @@ func NewServer(address string, port string) *Server {
 func (s *Server) addHandlers() {
 	mux := &http.ServeMux{}
 
-	mux.Handle("/spam", s.loggerMiddleware(http.HandlerFunc(s.spamHandler)))
+	mux.Handle("/spam", s.incrementMiddleware(s.loggerMiddleware(http.HandlerFunc(s.spamHandler))))
 
 	s.Handler = mux
 }
@@ -57,9 +62,19 @@ func (s Server) spamHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (s Server) loggerMiddleware(next http.Handler) http.Handler {
+func (s *Server) loggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.logger.Println(fmt.Sprintf("Request accepted from: %s", r.RemoteAddr))
+		s.logger.Println(fmt.Sprintf("Request #%d accepted from: %s", s.requestsReceived, r.RemoteAddr))
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) incrementMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.mux.Lock()
+		s.requestsReceived++
+		s.mux.Unlock()
 
 		next.ServeHTTP(w, r)
 	})
