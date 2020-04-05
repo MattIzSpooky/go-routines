@@ -34,8 +34,7 @@ func (s Spammer) Start() error {
 			case <-s.closeChan:
 				return
 			default:
-				if error2 := s.spam(); error2 != nil {
-					err = error2
+				if err = s.spam(); err != nil {
 					s.Stop()
 					break
 				}
@@ -44,11 +43,7 @@ func (s Spammer) Start() error {
 		}
 	}()
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (s Spammer) spam() error {
@@ -65,11 +60,7 @@ func (s Spammer) spam() error {
 
 	_, err = http.Post(fmt.Sprintf("http://%s/%s", s.addressToSpam, "spam"), "application/json", bytes.NewBuffer(requestBody))
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (s *Spammer) Stop() {
