@@ -25,7 +25,7 @@ func main() {
 
 	flag.Parse()
 
-	httpServer := server.NewServer("localhost", "8080")
+	httpServer := server.NewServer("localhost", 8080)
 
 	spammers := make([]*spammer.Spammer, amountOfSpammers)
 

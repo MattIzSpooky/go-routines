@@ -21,13 +21,13 @@ type Server struct {
 	requestsReceived int
 }
 
-func NewServer(address string, port string) *Server {
+func NewServer(address string, port int) *Server {
 	var fullAddress string
 
 	if runtime.GOOS != "windows" && address == "localhost" {
-		fullAddress = fmt.Sprintf(":%s", port)
+		fullAddress = fmt.Sprintf(":%d", port)
 	} else {
-		fullAddress = fmt.Sprintf("%s:%s", address, port)
+		fullAddress = fmt.Sprintf("%s:%d", address, port)
 	}
 
 	server := &Server{
