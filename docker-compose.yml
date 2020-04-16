@@ -1,0 +1,19 @@
+version: '3'
+services:
+  go-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: goroutines
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/app
+    tty: true
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
